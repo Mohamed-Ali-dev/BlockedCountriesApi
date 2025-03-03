@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Infrastructure.Repository
 {
-    internal class BlockedCountryRepository : IBlockedCountryRepository
+    public class BlockedCountryRepository : IBlockedCountryRepository
     {
         private static readonly ConcurrentDictionary<string, bool> _blockedCountries =
         new();

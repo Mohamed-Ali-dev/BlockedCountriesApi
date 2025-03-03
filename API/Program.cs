@@ -3,6 +3,7 @@ using Core.Services.Interfaces;
 using Core.Services.Implementation;
 using Microsoft.Extensions.Options;
 using Infrastructure.Repository.IRepository;
+using Infrastructure.Repository;
 
 
 
@@ -21,7 +22,7 @@ builder.Services.AddHttpClient<IGeolocationService, GeolocationService>(
         client.BaseAddress = new Uri(settings.BaseUrl);
     });
 
-builder.Services.AddScoped<IBlockedCountryRepository>
+builder.Services.AddScoped<IBlockedCountryRepository, BlockedCountryRepository>();
 
 builder.Services.AddSwaggerGen();
 
