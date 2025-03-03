@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Core.Services.Interfaces
 {
-    internal interface IGeolocationService
+    public interface IGeolocationService
     {
         Task<GeoInfo> GetGeolocationAsync(string ipAddress);
     }

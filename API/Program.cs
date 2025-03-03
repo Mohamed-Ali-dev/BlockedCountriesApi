@@ -1,6 +1,10 @@
 using Core.Helper;
 using Core.Services.Interfaces;
+using Core.Services.Implementation;
 using Microsoft.Extensions.Options;
+using Infrastructure.Repository.IRepository;
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,18 +12,17 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-//var ipApiconfig = builder.Configuration.GetSection("IpApi").Get<IpApiServiceSettings>();
-//builder.Services.AddSingleton(ipApiconfig);
-
 builder.Services.Configure<IpApiServiceSettings>(builder.Configuration.GetSection("IpApi"));
 builder.Services.AddHttpClient<IGeolocationService, GeolocationService>(
     (serviceProvider, client) =>
     {
         var settings = serviceProvider
-            .GetRequiredService<IOptions<IpApiServiceSettings>>()
-            .Value;
+            .GetRequiredService<IOptions<IpApiServiceSettings>>().Value;
         client.BaseAddress = new Uri(settings.BaseUrl);
     });
+
+builder.Services.AddScoped<IBlockedCountryRepository>
+
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
