@@ -1,20 +1,14 @@
-﻿using Core.Helper;
-using Core.Services.Interfaces;
+﻿using Core.Services.Interfaces;
+using Infrastructure.Configuration;
+using Infrastructure.DTOs;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Runtime;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Core.Services.Implementation
+namespace Infrastructure.Services.Implementation
 {
     public class GeolocationService(HttpClient httpClient, IOptions<IpApiServiceSettings> ipApiServiceSettings) : IGeolocationService
     {
-        public async Task<GeoInfo> GetGeolocationAsync(string ipAddress)
+        public async Task<GeoInfoDTO> GetGeolocationAsync(string ipAddress)
         {
             try
             {
@@ -23,7 +17,7 @@ namespace Core.Services.Implementation
                 response.EnsureSuccessStatusCode();
 
                 var json = await response.Content.ReadAsStringAsync();
-                var geoInfo = JsonConvert.DeserializeObject<GeoInfo>(json);
+                var geoInfo = JsonConvert.DeserializeObject<GeoInfoDTO>(json);
                 return geoInfo;
             }
             catch (HttpRequestException ex)

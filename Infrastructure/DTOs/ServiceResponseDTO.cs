@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Core.Helper
+namespace Infrastructure.DTOs
 {
-    public record ServiceResponse(bool Success = false, string Message = null!);
+    public record ServiceResponseDTO(bool Success = false, string Message = null!);
 }

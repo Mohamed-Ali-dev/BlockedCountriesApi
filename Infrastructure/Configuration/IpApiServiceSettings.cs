@@ -1,4 +1,4 @@
-﻿namespace Core.Helper
+﻿namespace Infrastructure.Configuration
 {
     public class IpApiServiceSettings
     {

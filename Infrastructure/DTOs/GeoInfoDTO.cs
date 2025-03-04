@@ -1,8 +1,8 @@
 ﻿using Newtonsoft.Json;
 
-namespace Core.Helper
+namespace Infrastructure.DTOs
 {
-    public class GeoInfo
+    public class GeoInfoDTO
     {
         [JsonProperty("country_code")]
         public string CountryCode { get; set; }
