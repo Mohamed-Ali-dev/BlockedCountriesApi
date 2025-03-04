@@ -1,7 +1,6 @@
-﻿using Infrastructure.Repository.IRepository;
-using Microsoft.AspNetCore.Http;
+﻿using Infrastructure.DTOs;
+using Infrastructure.Repository.IRepository;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics.Metrics;
 
 namespace API.Controllers
 {
@@ -10,18 +9,20 @@ namespace API.Controllers
     public class CountriesController(IBlockedCountryRepository blockedCountryRepository) : ControllerBase
     {
         [HttpGet]
-        public IActionResult Blocked()
+        public IActionResult GetBlockedCountries([FromQuery] FilterBlockedCountriesDTO filter)
         {
-            var blockedCountries = blockedCountryRepository.GetBlockedCountries();
+            var blockedCountries =  blockedCountryRepository.GetBlockedCountries(filter);
             return Ok(blockedCountries);
+
         }
+
         [HttpPost("block")]
         public IActionResult BlockCountry([FromBody] string countryCode)
         {
             if (string.IsNullOrWhiteSpace(countryCode))
                 return BadRequest("Country code cannot be empty");
 
-            var result = blockedCountryRepository.blockCountry(countryCode);
+            var result = blockedCountryRepository.BlockCountry(countryCode);
             if (!result.Success)
             {
                 return BadRequest(result.Message);

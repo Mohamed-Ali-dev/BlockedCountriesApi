@@ -10,8 +10,8 @@ namespace Infrastructure.Repository.IRepository
 {
     public interface IBlockedCountryRepository
     {
-        ServiceResponseDTO blockCountry(string countryCode);
+        List<BlockedCountry> GetBlockedCountries(FilterBlockedCountriesDTO filter);
+        ServiceResponseDTO BlockCountry(string countryCode);
         bool RemoveBlockedCountry(string countryCode);
-        List<BlockedCountry> GetBlockedCountries();
     }
 }
