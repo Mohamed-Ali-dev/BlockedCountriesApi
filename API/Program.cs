@@ -4,6 +4,7 @@ using Infrastructure.Repository.IRepository;
 using Infrastructure.Repository;
 using Infrastructure.Services.Implementation;
 using Infrastructure.Configuration;
+using Microsoft.AspNetCore.HttpOverrides;
 
 
 
@@ -28,13 +29,15 @@ builder.Services.AddHttpClient<IGeolocationService, GeolocationService>(
     });
 
 builder.Services.AddScoped<IBlockedCountryRepository, BlockedCountryRepository>();
+builder.Services.AddScoped<IIpRepository, IpRepository>();
+builder.Services.AddScoped<RedisCacheService>();
+
 //Redis - add Redis caching service in IServiceCollection
 builder.Services.AddStackExchangeRedisCache( options =>
 {
     options.Configuration = redisSettings.RedisConn;
     options.InstanceName = redisSettings.InstanceName;
 });
-builder.Services.AddScoped<RedisCacheService>();
 
 
 builder.Services.AddSession(options =>
@@ -54,6 +57,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
 app.UseSession();
 app.UseHttpsRedirection();
 

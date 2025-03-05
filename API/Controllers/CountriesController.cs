@@ -8,7 +8,7 @@ namespace API.Controllers
     [ApiController]
     public class CountriesController(IBlockedCountryRepository blockedCountryRepository) : ControllerBase
     {
-        [HttpGet]
+        [HttpGet("blocked")]
         public IActionResult GetBlockedCountries([FromQuery] FilterBlockedCountriesDTO filter)
         {
             var blockedCountries =  blockedCountryRepository.GetBlockedCountries(filter);
