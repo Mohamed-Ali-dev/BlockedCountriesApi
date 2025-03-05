@@ -8,11 +8,10 @@ using System.Globalization;
 
 namespace Infrastructure.Repository
 {
-    public class BlockedCountryRepository(RedisCacheService cacheService, IHttpContextAccessor httpContextAccessor) : IBlockedCountryRepository
+    public class BlockedCountryRepository(RedisCacheService cacheService) : IBlockedCountryRepository
     {
         private  readonly ConcurrentDictionary<string, BlockedCountry> _blockedCountries = LoadOrInitializeBlockedCountries(cacheService);
         private readonly RedisCacheService _cacheService = cacheService;
-        private readonly IHttpContextAccessor httpContextAccessor = httpContextAccessor;
         private const string CacheKey = "BlockedCountriesCache";
 
         private static ConcurrentDictionary<string, BlockedCountry> LoadOrInitializeBlockedCountries(RedisCacheService cacheService)
@@ -75,17 +74,9 @@ namespace Infrastructure.Repository
         }
         public List<BlockedCountry> GetBlockedCountries(FilterBlockedCountriesDTO filter)
         {
-            var blockedCountries = _cacheService.GetCacheData<ConcurrentDictionary<string, BlockedCountry>>(CacheKey);
+            var blockedCountries = _blockedCountries;
             IQueryable<BlockedCountry> query;
-            if (blockedCountries is null)
-            {
-                _cacheService.SetCachedData(CacheKey, _blockedCountries, TimeSpan.FromDays(1));
                 query = _blockedCountries.Values.AsQueryable();
-            }
-            else
-            {
-                query = blockedCountries.Values.AsQueryable();
-            }
             if (!string.IsNullOrEmpty(filter.CountryName))
             {
                 query = query.Where(x => x.CountryName.Contains(filter.CountryName, StringComparison.OrdinalIgnoreCase));

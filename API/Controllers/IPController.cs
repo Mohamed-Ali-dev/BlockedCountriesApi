@@ -10,7 +10,8 @@ namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class IPController(IIpRepository ipRepository, IBlockedCountryRepository blockedCountryRepository) : ControllerBase
+    public class IPController(IIpRepository ipRepository, IBlockedCountryRepository blockedCountryRepository, 
+        ILogRepository logRepository) : ControllerBase
     {
         private const string IpRegexPattern =
        @"^(?:1)?(?:\d{1,2}|2(?:[0-4]\d|5[0-5]))\." +
@@ -62,7 +63,10 @@ namespace API.Controllers
             bool isBlocked = blockedCountryRepository.IsCountryBlocked(countryCodeOfTheClient);
             if (isBlocked)
             {
+                var userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
+                logRepository.AddLog(ipAddress, geoInfo.CountryCode, isBlocked, userAgent);
                 return StatusCode(403, "Access denied. Your country is blocked.");
+
             }
             return Ok(new { message = "Access allowed.", country = countryCodeOfTheClient });
         }

@@ -30,6 +30,7 @@ builder.Services.AddHttpClient<IGeolocationService, GeolocationService>(
 
 builder.Services.AddScoped<IBlockedCountryRepository, BlockedCountryRepository>();
 builder.Services.AddScoped<IIpRepository, IpRepository>();
+builder.Services.AddScoped<ILogRepository, LogRepository>();
 builder.Services.AddScoped<RedisCacheService>();
 
 //Redis - add Redis caching service in IServiceCollection
