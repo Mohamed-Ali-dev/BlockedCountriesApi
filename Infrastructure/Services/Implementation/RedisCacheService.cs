@@ -11,16 +11,16 @@ namespace Infrastructure.Services.Implementation
         {
             _cache = cache;
         }
-        public T GetCacheData<T>(string key)
+        public async Task<T> GetCacheData<T>(string key)
         {
-            var jsonData = _cache.GetString(key);
+            var jsonData = await _cache.GetStringAsync(key);
 
             if (jsonData is null)
                 return default(T);
 
             return JsonConvert.DeserializeObject<T>(jsonData)!;
         }
-        public void SetCachedData<T>(string Key, T data, TimeSpan cacheDuration)
+        public async Task SetCachedData<T>(string Key, T data, TimeSpan cacheDuration)
         {
             var options = new DistributedCacheEntryOptions
             {
@@ -29,8 +29,8 @@ namespace Infrastructure.Services.Implementation
             };
             var jsonData = JsonConvert.SerializeObject(data);
 
-            _cache.SetString(Key, jsonData, options);
+          await  _cache.SetStringAsync(Key, jsonData, options);
         }
-        public void RemoveCache(string key) => _cache.Remove(key);
+        public async Task RemoveCache(string key) => await _cache.RemoveAsync(key);
     }
 }

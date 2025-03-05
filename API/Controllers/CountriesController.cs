@@ -30,6 +30,27 @@ namespace API.Controllers
 
             return Ok(result);
         }
+        [HttpPost("temporal-block")]
+        public  IActionResult BlockCountryTemporally([FromBody] TemporalBlockRequestDTO request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new {Errors = ModelState.Values.SelectMany(v => v.Errors)
+                .Select(e => e.ErrorMessage)});
+            }
+            var result = blockedCountryRepository.AddTemporalBlock(request.CountryCode, request.DurationMinutes);
+
+            return result.Success switch
+            {
+                true => Ok(result),
+                false when result.Message.Contains("is already blocked")
+                    => Conflict(result),
+                false when result.Message.Contains("Invalid country code")
+                    => BadRequest(result),
+                _ => StatusCode(500, result)
+            };
+        }
+
         [HttpDelete("block/{countryCode}")]
         public IActionResult UnblockCountry(string countryCode)
         {

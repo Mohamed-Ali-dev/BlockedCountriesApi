@@ -13,6 +13,7 @@ namespace Infrastructure.Repository
         private  readonly ConcurrentDictionary<string, BlockedCountry> _blockedCountries = LoadOrInitializeBlockedCountries(cacheService);
         private readonly RedisCacheService _cacheService = cacheService;
         private const string CacheKey = "BlockedCountriesCache";
+        private const string TemporalBlocksKey = "temporal_blocks";
 
         private static ConcurrentDictionary<string, BlockedCountry> LoadOrInitializeBlockedCountries(RedisCacheService cacheService)
         {
@@ -92,9 +93,43 @@ namespace Infrastructure.Repository
         public bool IsCountryBlocked(string countryCode)
         {
             countryCode = countryCode.ToUpperInvariant();
+
             var filter = new FilterBlockedCountriesDTO { CountryCode = countryCode };
-            var blockedCountries = GetBlockedCountries(filter);
-            return blockedCountries.Any();
+            var permanentBlockedCountries = GetBlockedCountries(filter);
+
+            // Check temporary blocks
+            var temporalBlockedCountries = _cacheService.GetCacheData<TemporalBlock>($"{TemporalBlocksKey}:{countryCode}");
+            return (temporalBlockedCountries != null || permanentBlockedCountries.Any());
+
+        }
+        public ServiceResponseDTO AddTemporalBlock(string countryCode, int durationMinutes)
+        {
+
+            try
+            {
+                var _ = new RegionInfo(countryCode);
+            }
+            catch(ArgumentException ex) 
+            {
+                return new ServiceResponseDTO(false, "Invalid country code.");
+            }
+
+            if(durationMinutes < 1 || durationMinutes > 1440)
+                return new ServiceResponseDTO(false, "Duration must be between 1 and 1440 minutes.");
+            // Check existing blocks
+            if (IsCountryBlocked(countryCode))
+                return new ServiceResponseDTO(false, $"Country '{countryCode}' is already blocked");
+
+            var block = new TemporalBlock
+            {
+                CountryCode = countryCode,
+                ExpiryTime = DateTime.UtcNow.AddMinutes(durationMinutes)
+            };
+
+            _cacheService.SetCachedData($"{TemporalBlocksKey}:{countryCode}", block, TimeSpan.FromMinutes(durationMinutes));
+
+            return new ServiceResponseDTO(true, $"Country '{countryCode}' temporarily blocked for {durationMinutes} minutes");
+         
         }
     }
 

@@ -14,5 +14,6 @@ namespace Infrastructure.Repository.IRepository
         ServiceResponseDTO BlockCountry(string countryCode);
         bool RemoveBlockedCountry(string countryCode);
         bool IsCountryBlocked(string countryCode);
+        ServiceResponseDTO AddTemporalBlock(string countryCode, int durationMinutes);
     }
 }
