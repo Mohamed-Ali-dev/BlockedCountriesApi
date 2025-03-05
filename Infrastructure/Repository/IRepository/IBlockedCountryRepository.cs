@@ -13,5 +13,6 @@ namespace Infrastructure.Repository.IRepository
         List<BlockedCountry> GetBlockedCountries(FilterBlockedCountriesDTO filter);
         ServiceResponseDTO BlockCountry(string countryCode);
         bool RemoveBlockedCountry(string countryCode);
+        bool IsCountryBlocked(string countryCode);
     }
 }

@@ -97,6 +97,14 @@ namespace Infrastructure.Repository
 
             return query.Skip((filter.Page - 1) * filter.PageSize).Take(filter.PageSize).ToList();
         }
+
+        public bool IsCountryBlocked(string countryCode)
+        {
+            countryCode = countryCode.ToUpperInvariant();
+            var filter = new FilterBlockedCountriesDTO { CountryCode = countryCode };
+            var blockedCountries = GetBlockedCountries(filter);
+            return blockedCountries.Any();
+        }
     }
 
 }
