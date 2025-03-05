@@ -1,8 +1,7 @@
-﻿using Core.Services.Interfaces;
-using Infrastructure.DTOs;
+﻿using Infrastructure.DTOs;
 using Infrastructure.Repository.IRepository;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using System.Net;
 using System.Text.RegularExpressions;
 
@@ -10,6 +9,7 @@ namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [EnableRateLimiting("api")]
     public class IPController(IIpRepository ipRepository, IBlockedCountryRepository blockedCountryRepository, 
         ILogRepository logRepository) : ControllerBase
     {
@@ -42,9 +42,10 @@ namespace API.Controllers
             return Ok(geoInfo);
         }
         [HttpGet("check-block")]
-        public async Task<IActionResult> CheckBlock([FromQuery] string? ipAddress)
+        public async Task<IActionResult> CheckBlock()
         {
-            var result = CheckIPAddress(ipAddress);
+            var result = CheckIPAddress(null);
+            string ipAddress;
             if (!result.Success)
             {
                 return BadRequest(result.Message);
@@ -63,7 +64,7 @@ namespace API.Controllers
             bool isBlocked = blockedCountryRepository.IsCountryBlocked(countryCodeOfTheClient);
             if (isBlocked)
             {
-                var userAgent = HttpContext.Request.Headers["User-Agent"].ToString();
+                var userAgent = HttpContext.Request.Headers.UserAgent.ToString();
                 logRepository.AddLog(ipAddress, geoInfo.CountryCode, isBlocked, userAgent);
                 return StatusCode(403, "Access denied. Your country is blocked.");
 

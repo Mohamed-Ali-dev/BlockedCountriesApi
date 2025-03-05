@@ -2,7 +2,6 @@
 using Infrastructure.DTOs;
 using Infrastructure.Repository.IRepository;
 using Infrastructure.Services.Implementation;
-using Microsoft.AspNetCore.Http;
 using System.Collections.Concurrent;
 using System.Globalization;
 
@@ -11,7 +10,6 @@ namespace Infrastructure.Repository
     public class BlockedCountryRepository(RedisCacheService cacheService) : IBlockedCountryRepository
     {
         private  readonly ConcurrentDictionary<string, BlockedCountry> _blockedCountries = LoadOrInitializeBlockedCountries(cacheService);
-        private readonly RedisCacheService _cacheService = cacheService;
         private const string CacheKey = "BlockedCountriesCache";
         private const string TemporalBlocksKey = "temporal_blocks";
 
@@ -46,7 +44,7 @@ namespace Infrastructure.Repository
 
           
 
-            BlockedCountry country = new BlockedCountry
+            BlockedCountry country = new ()
             {
                 CountryCode = countryCode,
                 CountryName = region.EnglishName,
@@ -55,7 +53,7 @@ namespace Infrastructure.Repository
             if (added)
             {
                 // Update the cache with the new dictionary
-                _cacheService.SetCachedData(CacheKey, _blockedCountries, TimeSpan.FromDays(1));
+                cacheService.SetCachedData(CacheKey, _blockedCountries, TimeSpan.FromDays(1));
                 return new ServiceResponseDTO(true, $"Country code '{countryCode}' has been blocked.");
             }
             else
@@ -69,7 +67,7 @@ namespace Infrastructure.Repository
             if (removed)
             {
                 // Update the cache after removal
-                _cacheService.SetCachedData(CacheKey, _blockedCountries, TimeSpan.FromDays(1));
+                cacheService.SetCachedData(CacheKey, _blockedCountries, TimeSpan.FromDays(1));
             }
             return removed;
         }
@@ -98,8 +96,8 @@ namespace Infrastructure.Repository
             var permanentBlockedCountries = GetBlockedCountries(filter);
 
             // Check temporary blocks
-            var temporalBlockedCountries = _cacheService.GetCacheData<TemporalBlock>($"{TemporalBlocksKey}:{countryCode}");
-            return (temporalBlockedCountries != null || permanentBlockedCountries.Any());
+            var temporalBlockedCountries = cacheService.GetCacheData<TemporalBlock>($"{TemporalBlocksKey}:{countryCode}");
+            return (temporalBlockedCountries != null || permanentBlockedCountries.Count != 0);
 
         }
         public ServiceResponseDTO AddTemporalBlock(string countryCode, int durationMinutes)
@@ -109,7 +107,7 @@ namespace Infrastructure.Repository
             {
                 var _ = new RegionInfo(countryCode);
             }
-            catch(ArgumentException ex) 
+            catch(ArgumentException) 
             {
                 return new ServiceResponseDTO(false, "Invalid country code.");
             }
@@ -126,7 +124,7 @@ namespace Infrastructure.Repository
                 ExpiryTime = DateTime.UtcNow.AddMinutes(durationMinutes)
             };
 
-            _cacheService.SetCachedData($"{TemporalBlocksKey}:{countryCode}", block, TimeSpan.FromMinutes(durationMinutes));
+            cacheService.SetCachedData($"{TemporalBlocksKey}:{countryCode}", block, TimeSpan.FromMinutes(durationMinutes));
 
             return new ServiceResponseDTO(true, $"Country '{countryCode}' temporarily blocked for {durationMinutes} minutes");
          

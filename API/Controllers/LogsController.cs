@@ -1,6 +1,5 @@
 ﻿using Infrastructure.DTOs;
 using Infrastructure.Repository.IRepository;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers

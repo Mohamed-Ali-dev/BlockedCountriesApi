@@ -2,12 +2,7 @@
 using Infrastructure.DTOs;
 using Infrastructure.Repository.IRepository;
 using Infrastructure.Services.Implementation;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace Infrastructure.Repository
 {
@@ -15,9 +10,8 @@ namespace Infrastructure.Repository
     {
         private const string _logsCacheKey = "blocked-attempts-logs";
         private readonly TimeSpan _cacheDuration = TimeSpan.FromDays(1);
-        private readonly RedisCacheService _cacheService = cacheService;
 
-        private List<BlockedAttemptLog> _logEntries = LoadOrInitializeLogs(cacheService);
+        private readonly List<BlockedAttemptLog> _logEntries = LoadOrInitializeLogs(cacheService);
         private static List<BlockedAttemptLog> LoadOrInitializeLogs(RedisCacheService cacheService)
         {
             // Load from Redis
@@ -46,7 +40,7 @@ namespace Infrastructure.Repository
             };
          _logEntries.Add(log);
 
-         _cacheService.SetCachedData(_logsCacheKey, _logEntries, _cacheDuration);
+         cacheService.SetCachedData(_logsCacheKey, _logEntries, _cacheDuration);
         }
 
         public List<BlockedAttemptLog> GetAllLogs(PaginationDTO paginationDTO)

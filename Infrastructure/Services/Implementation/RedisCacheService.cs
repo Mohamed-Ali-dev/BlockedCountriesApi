@@ -4,23 +4,19 @@ using System.Text;
 
 namespace Infrastructure.Services.Implementation
 {
-    public class RedisCacheService
+    public class RedisCacheService(IDistributedCache? cache)
     {
-        private readonly IDistributedCache? _cache;
-        public RedisCacheService(IDistributedCache? cache)
+
+        public T GetCacheData<T>(string key)
         {
-            _cache = cache;
-        }
-        public async Task<T> GetCacheData<T>(string key)
-        {
-            var jsonData = await _cache.GetStringAsync(key);
+            var jsonData = cache.GetString(key);
 
             if (jsonData is null)
-                return default(T);
+                return default;
 
             return JsonConvert.DeserializeObject<T>(jsonData)!;
         }
-        public async Task SetCachedData<T>(string Key, T data, TimeSpan cacheDuration)
+        public void SetCachedData<T>(string Key, T data, TimeSpan cacheDuration)
         {
             var options = new DistributedCacheEntryOptions
             {
@@ -29,8 +25,8 @@ namespace Infrastructure.Services.Implementation
             };
             var jsonData = JsonConvert.SerializeObject(data);
 
-          await  _cache.SetStringAsync(Key, jsonData, options);
+            cache.SetString(Key, jsonData, options);
         }
-        public async Task RemoveCache(string key) => await _cache.RemoveAsync(key);
+        public void RemoveCache(string key) => cache.Remove(key);
     }
 }

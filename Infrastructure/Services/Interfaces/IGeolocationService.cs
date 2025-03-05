@@ -1,6 +1,6 @@
 ﻿using Infrastructure.DTOs;
 
-namespace Core.Services.Interfaces
+namespace Infrastructure.Services.Interfaces
 {
     public interface IGeolocationService
     {
